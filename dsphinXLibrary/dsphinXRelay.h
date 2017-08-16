@@ -305,6 +305,11 @@ protected:
 
     /**
      *   /status
+     *   /ON
+     *   /OFF
+     *   /update
+     *
+     *
      */
     static void handleStatus() {
 
@@ -322,9 +327,6 @@ protected:
         showMessage += " <p> <br/><a id='status' target='_blank' href='/update'> <small> update firmware </small> </a> </p>";
         showMessage += " <p> <br/> <small> Collection Server " + (String) CollectionRelayDATA_Server_IP + " script " +
                        (String) CollectionRelayDATA_Server_Script + ", as " + (String) WiFi_ClientName + " </small>  </p>";
-//        showMessage += "  <small> Collection Interval " + (String) CollectionDATA_Interval_Seconds +
-//                       " sec,  Connect to Wifi " + (String) WiFi_ssid + " </small>  <br/>";
-//
         showMessage += " <p> <br/> <small> firmware version " + (String) dsphinXVersion + " </small>  </p>";
 
 
