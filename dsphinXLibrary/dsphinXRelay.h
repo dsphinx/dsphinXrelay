@@ -253,37 +253,38 @@ protected:
     }
 
     /**
-     *   HTML5 localstorage
+     *   handle toogle button
+     *   with sync ajax    xhr.open('GET', '/ON', false);
      *
+     *    not async
      *
-     * @return
+     * @return JS code  xhr.open('GET', '/ON', true);
      */
     static String htmlJSLocalStorage() {
 
         // sessionStorage.clear();
 
-        String JS = "function toggleClass(element) {\
+        String JS = "function toggleClass(element) { \
         var classString = element.className;\
         var isOn = element.checked;\
-        var title = ' Relay Control : ';\
-        var xhr = new XMLHttpRequest();\
+        var title = ' Relay Control : '; \
+        var xhr = new XMLHttpRequest(); \
         if (isOn) {\
-            xhr.open('GET', '/ON');\
+            xhr.open('GET', '/ON', false);  \
             document.title = title + ' ON '; \
         } else {\
-            xhr.open('GET', '/OFF');\
+            xhr.open('GET', '/OFF', false); \
             document.title = title + ' OFF '; \
         }\
-        xhr.send(null);\
+            xhr.send(null);\
         }\
+      \
         document.getElementById('Button_ONOFF').addEventListener('click', function () {\
             toggleClass(document.getElementById('Button_ONOFF'));\
-        });  ";
-
+        });\    ";
 
         return JS;
     }
-
 
     /**
    *   URI not found
@@ -314,7 +315,7 @@ protected:
     static void handleStatus() {
 
         String showMessage = dsphinXRelay::htmlHeader("Arduino ESP8266 +  Relay + dsphinX Library Status",
-                                                      dsphinXRelay::htmlCSS(), "",                                                      "");
+                                                      dsphinXRelay::htmlCSS(), "", "");
         showMessage += " <br/> <br/><h2> Uptime <span class=\"uptime\">" + dsphinXRelay::uptime() +
                        "</span> </h2> <br/> <br/>";
 
@@ -326,7 +327,8 @@ protected:
         showMessage += "<a target='_blank' href='/scanWifi'> Wifi Scanner </a> </li> </ul>";
         showMessage += " <p> <br/><a id='status' target='_blank' href='/update'> <small> update firmware </small> </a> </p>";
         showMessage += " <p> <br/> <small> Collection Server " + (String) CollectionRelayDATA_Server_IP + " script " +
-                       (String) CollectionRelayDATA_Server_Script + ", as " + (String) WiFi_ClientName + " </small>  </p>";
+                       (String) CollectionRelayDATA_Server_Script + ", as " + (String) WiFi_ClientName +
+                       ", pin Data : " + (String) RELAYPIN + " </small>  </p>";
         showMessage += " <p> <br/> <small> firmware version " + (String) dsphinXVersion + " </small>  </p>";
 
 
@@ -335,7 +337,6 @@ protected:
 
         dsphinX::showLEDOutput(false);
     }
-
 
     /**
    *
@@ -352,12 +353,13 @@ protected:
    * @param Proto
    * @return
    */
-    static bool sendCollectionData(String GetParams="", String Host = "", String Port = "", String Script = "", String Proto = "http://") {
+    static bool sendCollectionData(String GetParams = "", String Host = "", String Port = "", String Script = "",
+                                   String Proto = "http://") {
 
         String uri = "";
         bool ret = false;
 
-        GetParams = (GetParams == "") ?"?state=" + (String)  RelayState  : GetParams;
+        GetParams = (GetParams == "") ? "?state=" + (String) RelayState : GetParams;
         Host = (Host == "") ? (String) CollectionRelayDATA_Server_IP : Host;
         Port = (Port == "") ? (String) CollectionRelayDATA_Server_PORT : Port;
         Script = (Script == "") ? (String) CollectionRelayDATA_Server_Script : Script;
@@ -371,7 +373,8 @@ protected:
         if (::debug) ("URI:" + uri + " \n");
 
         if (!client.connect(CollectionRelayDATA_Server_IP, CollectionRelayDATA_Server_PORT)) {
-            if (::debug)("connection to Server Collection FAILED :" + (String) CollectionRelayDATA_Server_IP + ":" +
+            if (::debug)
+                ("connection to Server Collection FAILED :" + (String) CollectionRelayDATA_Server_IP + ":" +
                  (String) CollectionRelayDATA_Server_PORT);
         }
 
@@ -417,7 +420,6 @@ protected:
 
         return ret;
     }
-
 
     /**
      *  UPDATE:
@@ -480,28 +482,32 @@ protected:
    */
     static void handleRoot() {
 
-        String showMessage = dsphinXRelay::htmlHeader("Relay Control - dsphinX ", dsphinXRelay::htmlCSS(), ""                     ,                                                      "");
+        String showMessage = dsphinXRelay::htmlHeader("Relay Control - dsphinX ", dsphinXRelay::htmlCSS(), "", "");
 
-        String  whatMessage =  (RelayState) ? "false" : "true";
+        String whatMessage = (RelayState) ? "true" : "false";
 
-        showMessage +=              "<br/> <a id='status' target='_blank' href='/status'> <small> [ status ]</small> </a>";
-        showMessage += "<h2>Relay Control " + (String) WiFi_ClientName +"</h2>\
+        showMessage += "<br/> <a id='status' target='_blank' href='/status'> <small> [ status ]</small> </a>";
+        showMessage += "<h2>Relay Control " + (String) WiFi_ClientName + "</h2>\
                 <ul class='tg-list'>\
                 <li class='tg-list-item'>\
-                <h4>Module Relay is   <span id='state'> </span>  </h4>\
-                <input title='toggle Relay Module ' id='Button_ONOFF' class='tgl tgl-skewed' type='checkbox'/>\
-                <label class='tgl-btn' data-tg-off='OFF' data-tg-on='ON' for='Button_ONOFF'></label>\
+                <h4> Module Relay is <span id='state'> </span>  </h4>\
+                <input  id='Button_ONOFF' class='tgl tgl-skewed' type='checkbox'/>\
+                <label alt='click on to Switch - toggle mode' title='click on to Switch - toggle mode' class='tgl-btn' data-tg-off='OFF' data-tg-on='ON' for='Button_ONOFF'></label>\
                 </li>\
                 </ul>";
 
+        showMessage +=
+                "<script> var stateIS=" + whatMessage + "; " + dsphinXRelay::htmlJSLocalStorage() +
+                " document.getElementById('Button_ONOFF').checked = " + whatMessage + ";</script>";
         showMessage += dsphinXRelay::htmlFooter();
-        showMessage += "<script>" +  dsphinXRelay::htmlJSLocalStorage() + "document.getElementById('Button_ONOFF').checked ="+whatMessage+";</script>";
+        dsphinXRelayWeb.send(200, "text/html", showMessage);
 
         dsphinX::showLEDOutput(true);
 
-        dsphinXRelayWeb.send(200, "text/html", showMessage);
-// dsphinXWebServer
+
+        delay(10);
         dsphinX::showLEDOutput(false);
+        delay(10);
 
     }
 
@@ -541,32 +547,23 @@ protected:
 
 
         dsphinXRelayWeb.send(200, "text/html", showMessage);
+        delay(200);
 
     }
-
-
-    static void getState() {
-
-        String showMessage = (String) RelayState;
-
-        dsphinXRelayWeb.send(200, "text/html", showMessage);
-
-    }
-
 
 
 public:
 
     dsphinXRelay(bool start = true) {
 
-#ifdef RELAYPIN
-        RELAY_PIN_NO = RELAYPIN;
+#ifndef   RELAYPIN
+#define RELAYPIN  RELAY_PIN_NO
 #endif
 
         if (start) {
             // Output
             pinMode(RELAYPIN, OUTPUT);
-            show(" Relay Status: Init Output : PIN = " + (String) RELAY_PIN_NO);
+            show(" Relay Status: Init Output : PIN = " + (String) RELAYPIN);
         }
     }
 
@@ -586,7 +583,7 @@ public:
 
         dsphinXRelayWeb.on("/ON", dsphinXRelay::setON);         // /on
         dsphinXRelayWeb.on("/OFF", dsphinXRelay::setOFF);       // /off
-        dsphinXRelayWeb.on("/getState", dsphinXRelay::getState);       // /off
+        dsphinXRelayWeb.on("/getState", dsphinXRelay::getStateHtml);       // /off
         dsphinXRelayWeb.on("/scanWifi", dsphinXRelay::handleScanWifi);     // /scanWifi
 
         dsphinXRelayWeb.on("/status", dsphinXRelay::handleStatus);     // /status
@@ -602,30 +599,34 @@ public:
      *
      * @param status
      */
-    static void handleRelay(bool status) {
+    static void handleRelay() {
 
+        bool status = dsphinXRelay::getState();
         int what = (status) ? HIGH : LOW;
-        String  whatMessage = (status) ? " Relay OFF " : " Relay ON ";
-
-        String showMessage = dsphinXRelay::htmlHeader("Relay Control - dsphinX ", dsphinXRelay::htmlCSS(),
-                                                      dsphinXRelay::htmlJSLocalStorage(), "");
-
-        digitalWrite(RELAYPIN, what);
-
-        RelayStateChanged = dsphinXRelay::uptime();
-
-
-        showMessage += whatMessage;
-
-        showMessage += dsphinXRelay::htmlFooter();
+//        String whatMessage = (status) ? " Relay OFF " : " Relay ON ";
+//        String showMessage = dsphinXRelay::htmlHeader("Relay Control - dsphinX ", dsphinXRelay::htmlCSS(),
+//                                                      dsphinXRelay::htmlJSLocalStorage(), "");
+//
+//        showMessage += whatMessage;
+//
+//        showMessage += dsphinXRelay::htmlFooter();
+//         dsphinXRelayWeb.send(200, "text/html", showMessage);
+//          dsphinXRelayWeb.send(200, "text/html",  (String) RelayState);
 
         dsphinX::showLEDOutput(true);
 
-        dsphinXRelayWeb.send(200, "text/html", showMessage);
-        // dsphinXWebServer
-        dsphinX::showLEDOutput(false);
+        digitalWrite(RELAYPIN, what);
+        RelayStateChanged = dsphinXRelay::uptime();
+
+
+        dsphinXRelay::getStateHtml();
+
+        delay(10);
 
         sendCollectionData();
+        delay(10);
+        dsphinX::showLEDOutput(false);
+
 
     }
 
@@ -633,10 +634,10 @@ public:
      *   turn circuit on
      */
     static void setON() {
-        RelayState = false;
-        handleRelay(RelayState);
+        dsphinXRelay::setState(true);
+        handleRelay();
         if (::debug) {
-            Serial.println(" Relay Status: ON");
+            Serial.println(" Relay Status: ON " + (String) RelayState);
         }
     }
 
@@ -644,13 +645,49 @@ public:
      * turn circuit off
      */
     static void setOFF() {
-        RelayState = true;
-        handleRelay(RelayState);
+        dsphinXRelay::setState(false);
+        handleRelay();
         if (::debug) {
-            Serial.println(" Relay Status: OFF ");
-
+            Serial.println(" Relay Status: OFF " + (String) RelayState);
         }
     }
+
+    /**
+     *
+     *  get output of current state text/plain or text/html
+     *
+     * @param typeOut
+     */
+    static void getStateHtml() {
+
+        String showMessage = (String) dsphinXRelay::getState();
+        String typeOut = "text/plain";
+
+
+        dsphinXRelayWeb.send(200, typeOut, showMessage);
+        //  dsphinXRelayWeb.send(200, "text/html", showMessage);
+        delay(10);
+
+    }
+
+    /**
+     *  get current state
+     *
+     * @return
+     */
+    static bool getState() {
+        return RelayState;
+    }
+
+    /**
+     *  set State for human UI, not circuit state
+     *
+     * @param isON
+     */
+    static void setState(bool isON) {
+        RelayState = isON;
+    }
+
 
     /**
     *   run at infinity from loop()
@@ -658,7 +695,6 @@ public:
     *    handle Client
     */
     void runServerRelay() {
-
         dsphinXRelayWeb.handleClient();
     }
 

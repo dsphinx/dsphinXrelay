@@ -19,7 +19,7 @@
  *
 */
 
-#define dsphinXVersion     .67
+#define dsphinXVersion     .69
 
 // save last stages
 #define HistoryValues       5

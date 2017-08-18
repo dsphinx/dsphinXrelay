@@ -3,14 +3,14 @@
 
 This project brings support for ESP8266 chip (WeMOs D1 R2) to the Arduino environment. It lets you write sketches using this library to simplify actions like webserver requests, scan wifi  and upgrade firmware over web.
 
-
+<br/>
 Initial URI Support for 
-
-
-IP/ON
-IP/OFF
-IP/status
-IP/update
-
+<br/>
+<br/>
+IP/ON<br/>
+IP/OFF<br/>
+IP/status<br/>
+IP/update<br/>
+<br/>
 
  
